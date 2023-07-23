@@ -1,51 +1,34 @@
 #include <bits/stdc++.h>
 using namespace std;
 
-bool isWell(int num)
-{
-    return num == 202021 ||
-           num == 20202021 ||
-           num == 202002021 ||
-           num == 202012021 ||
-           num == 202022021 ||
-           num == 202032021 ||
-           num == 202042021 ||
-           num == 202052021 ||
-           num == 202062021 ||
-           num == 202072021 ||
-           num == 202082021 ||
-           num == 202092021;
-}
+vector<int> target = {202021, 20202021, 202002021, 202012021, 202022021, 202032021, 202042021, 202052021, 202062021, 202072021, 202082021, 202092021};
+
 void solve()
 {
     int n;
     long result = 0;
-    map<int, int> nmap;
+    vector<int> nums;
 
     cin >> n;
     for (int i = 0; i < n; i++)
     {
         int token;
         cin >> token;
-
-        auto iter = nmap.find(token);
-        if (iter != nmap.end())
-            iter->second++;
-        else
-            nmap.insert({token, 1});
+        nums.push_back(token);
     }
 
-    for (map<int, int>::iterator iter1 = nmap.begin(); iter1 != nmap.end(); iter1++)
+    sort(nums.begin(), nums.end());
+
+    for (int j = 0; j < nums.size(); j++)
     {
-        for (map<int, int>::iterator iter2 = next(iter1, 1); iter2 != nmap.end(); iter2++)
+        for (int i = 0; i < 12; i++)
         {
-            if (isWell(iter1->first + iter2->first))
-            {
-                result += (long)iter1->second * iter2->second;
-            }
+            int targetSize = target[i] - nums[j];
+            if (targetSize > nums[j])
+                break;
+            result += upper_bound(nums.begin(), nums.end(), targetSize) - lower_bound(nums.begin(), nums.end(), targetSize);
         }
     }
-
     cout << result << '\n';
 }
 
