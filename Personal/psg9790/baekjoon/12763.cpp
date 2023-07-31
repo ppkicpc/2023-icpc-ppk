@@ -17,6 +17,8 @@ struct NodeCmp
 {
     bool operator()(const Node *a, const Node *b)
     {
+        if (a->costUsed == b->costUsed)
+            return a->timePassed > b->timePassed;
         return a->costUsed > b->costUsed;
     }
 };
@@ -24,39 +26,45 @@ struct NodeCmp
 int n, t, m;
 vector<vector<it3>> adj;
 vector<int> costs;
+vector<int> times;
+
 void dijkstra(int start)
 {
+    int result = INT_MAX;
+
     priority_queue<Node *, vector<Node *>, NodeCmp> pq;
-    pq.push(new Node(start, 0, 0));
-    costs[start] = 0;
+
+    Node *init = new Node(start, 0, 0);
+    pq.push(init);
 
     while (!pq.empty())
     {
         Node *frt = pq.top();
         pq.pop();
-
-        if (costs[frt->curNum] < frt->costUsed)
+        if (frt->timePassed > t) // time overflow
             continue;
+        if (frt->timePassed > times[frt->curNum] && frt->costUsed > costs[frt->curNum])
+            continue;
+        if (frt->curNum == n) // denote result
+            result = min(result, frt->costUsed);
 
-        for (auto i : adj[frt->curNum])
+        for (auto u : adj[frt->curNum])
         {
-            int nextNum, nextTime, nextCost;
-            tie(nextNum, nextTime, nextCost) = i;
+            int nextNum = get<0>(u), nextTime = get<1>(u), nextCost = get<2>(u);
             int targetTime = frt->timePassed + nextTime;
-            if (targetTime > t)
-                continue;
             int targetCost = frt->costUsed + nextCost;
-            if (costs[nextNum] < targetCost)
+
+            if (targetTime > times[nextNum] && targetCost > costs[nextNum])
                 continue;
-            costs[nextNum] = targetCost;
+            else if (targetTime < times[nextNum] && targetCost < costs[nextNum])
+            {
+                times[nextNum] = targetTime;
+                costs[nextNum] = targetCost;
+            }
             pq.push(new Node(nextNum, targetTime, targetCost));
         }
     }
-
-    if (costs[n] == INT_MAX)
-        cout << -1 << '\n';
-    else
-        cout << costs[n] << '\n';
+    cout << result << '\n';
 }
 
 void solve()
@@ -64,6 +72,7 @@ void solve()
     cin >> n >> t >> m;
     adj.resize(n + 1);
     costs.assign(n + 1, INT_MAX);
+    times.assign(n + 1, INT_MAX);
 
     int l;
     cin >> l;
