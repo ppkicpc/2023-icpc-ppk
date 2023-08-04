@@ -6,50 +6,41 @@ using ip = pair<int, int>;
 
 int n, m;
 vector<vector<int>> adj;
-vector<bool> visited;
-vector<int> order;
-
-void dfs(int idx)
-{
-    visited[idx] = true;
-
-    sort(adj[idx].begin(), adj[idx].end(), [](int a, int b)
-         { return a > b; });
-    for (auto i : adj[idx])
-    {
-        if (!visited[i])
-        {
-            dfs(i);
-        }
-    }
-    order.push_back(idx);
-}
+vector<int> inDegree;
 
 void solve()
 {
     cin >> n >> m;
     adj.resize(n + 1);
-    visited.assign(n + 1, false);
+    inDegree.assign(n + 1, 0);
 
     for (int i = 0; i < m; i++)
     {
         int a, b;
         cin >> a >> b;
         adj[a].push_back(b);
+        inDegree[b]++;
     }
 
-    for (int i = n; i > 0; i--)
+    priority_queue<int, vector<int>, greater<int>> pq;
+    for (int i = 1; i <= n; i++)
+        if (inDegree[i] == 0)
+            pq.push(i);
+
+    while (!pq.empty())
     {
-        if (!visited[i])
+        int frt = pq.top();
+        pq.pop();
+
+        cout << frt << ' ';
+        for (auto u : adj[frt])
         {
-            dfs(i);
+            if (--inDegree[u] == 0)
+            {
+                pq.push(u);
+            }
         }
     }
-    reverse(order.begin(), order.end());
-
-    for (auto i : order)
-        cout << i << ' ';
-    cout << '\n';
 }
 
 int main()
